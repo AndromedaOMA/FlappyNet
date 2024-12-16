@@ -1,5 +1,5 @@
 <h1 align="center">Hi 👋, here we have the FlappyNet project</h1>
-<h3 align="center">Developed this project in the fifth semester of the faculty.</h3>
+<h3 align="center">Developed this project together with Marin Andrei (andier13 on GitHub) in the fifth semester of the faculty.</h3>
 
 
 ## Content
