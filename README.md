@@ -9,7 +9,7 @@
 --------------------------------------------------------------------------------
 <h1 id="flappynet" align="left">FlappyNet:</h1>
 
-**NOTE**: This project represents the final project supported and realized within the Neueonal Networks laboratories of the Faculty of Informatics of the Alexandru Ioan Cuza University in Iași, Romania.
+**NOTE**: This project represents the final project supported and realized within the Neueonal Networks laboratories of the Faculty of Computer Science of the Alexandru Ioan Cuza University in Iași, Romania.
 
 <h3 align="left">Here we have the requirement:</h3>
 
