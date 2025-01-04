@@ -1,5 +1,5 @@
 <h1 align="center">Hi 👋, here we have the FlappyNet project</h1>
-<h3 align="center">Developed this project in the fifth semester of the faculty.</h3>
+<h3 align="center">Developed this project together with Marin Andrei (andier13 on GitHub) in the fifth semester of the faculty.</h3>
 
 
 ## Content
@@ -9,7 +9,7 @@
 --------------------------------------------------------------------------------
 <h1 id="flappynet" align="left">FlappyNet:</h1>
 
-**NOTE**: This project represents the final project supported and realized within the Neueonal Networks laboratories of the Faculty of Informatics of the Alexandru Ioan Cuza University in Iași, Romania.
+**NOTE**: This project represents the final project supported and realized within the Neueonal Networks laboratories of the Faculty of Computer Science of the Alexandru Ioan Cuza University in Iași, Romania.
 
 <h3 align="left">Here we have the requirement:</h3>
 
