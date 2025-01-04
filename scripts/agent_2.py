@@ -3,8 +3,8 @@ import gymnasium
 import torch
 import itertools
 import random
-# from scripts import DQN
-from scripts import DuelingDQN, ReplayMemory
+from scripts import DQN
+from scripts import ReplayMemory
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
@@ -25,7 +25,6 @@ class Agent:
         self.stop_on_reward = 500
         self.best_reward = 5
 
-        self.enable_double_dqn = True
         self.model_to_test = model_to_test
 
         self.loss_fn = torch.nn.SmoothL1Loss()
@@ -41,7 +40,7 @@ class Agent:
 
         num_states = env.observation_space.shape[0]
         num_actions = env.action_space.n
-        policy_dqn = DuelingDQN(in_layer_dim=num_states, out_layer_dim=num_actions).to(device)
+        policy_dqn = DQN(in_layer_dim=num_states, out_layer_dim=num_actions).to(device)
 
         if not is_training:
             policy_dqn.load_state_dict(torch.load(self.model_to_test))
@@ -51,8 +50,8 @@ class Agent:
             memory = ReplayMemory(self.replay_memory_size)
             epsilon = self.epsilon_init
 
-            # Duplicate the DuelingDQN for target_dqn where we gonna compute the Q values
-            target_dqn = DuelingDQN(in_layer_dim=num_states, out_layer_dim=num_actions).to(device)
+            # Duplicate the DQN for target_dqn where we gonna compute the Q values
+            target_dqn = DQN(in_layer_dim=num_states, out_layer_dim=num_actions).to(device)
             # Copy the w and b at target_dqn from policy_dqn
             target_dqn.load_state_dict(policy_dqn.state_dict())
 
@@ -109,7 +108,7 @@ class Agent:
 
             if episode_reward > self.best_reward:
                 self.best_reward = episode_reward
-                torch.save(policy_dqn.state_dict(), f"./best_models/DuelingDQN/trained_q_function_{self.best_reward:.3f}.pth")
+                torch.save(policy_dqn.state_dict(), f"./best_models/trained_q_function_{self.best_reward:.3f}.pth")
                 print(f"Model with best reward of {episode_reward} saved at episode {episode}.")
 
             print(f"Episode: {episode}, Reward: {episode_reward}, Epsilon: {epsilon:.3f}")
@@ -137,15 +136,8 @@ class Agent:
         terminations = torch.tensor(terminations, dtype=torch.float, device=device)
 
         with torch.no_grad():
-            if self.enable_double_dqn:
-                best_action_from_policy = policy_dqn(new_states).argmax(dim=1)
-
-                """Double DQN Target Formula"""
-                target_q = rewards + (1 - terminations) * self.discount_factor_g * target_dqn(new_states).gather(dim=1,
-                                                                                                                 index=best_action_from_policy.unsqueeze(dim=1)).squeeze()
-            else:
-                """DQN Target Formula"""
-                target_q = rewards + (1 - terminations) * self.discount_factor_g * target_dqn(new_states).max(dim=1)[0]
+            """DQN Target Formula"""
+            target_q = rewards + (1 - terminations) * self.discount_factor_g * target_dqn(new_states).max(dim=1)[0]
 
         # Compute Q values from policy
         current_q = policy_dqn(states).gather(dim=1, index=actions.unsqueeze(dim=1)).squeeze()
