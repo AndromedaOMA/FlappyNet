@@ -29,11 +29,15 @@ You can train the model directly on images (the model receives the pixels) or yo
 
 It is not necessary to implement the neural network from scratch (you can use PyTorch), but you must implement the Q learning algorithm.
 
+<h3 align="left">How does it work?</h3>
+  Implemented several scripts that serve the purpose of training the FlappyBird agent. The scripts are placed in two broad typologies: Deep Q Learning (DQL) and Convolutional Deep Q Learning (CDQN). Both follow the same implementation, the only difference is given by the convolutional aspect of CDQN.
+  At the same time, for each type of architecture, pre-trained models are available from which we can choose to visualize the FlappyBird agent through the graphical interface, through the "FlappyBird-v0" environment for Gymnasium.
+  Delving into the implementation idea, the solution uses the concepts of Double DQN (DDQN) and Dueling DQN (Dueling Architecture). These approaches significantly help in training the agent.
+
+  
 <h3 align="left">The logic behind the code:</h3>
   - ...
 
-<h3 align="left">How does it work?</h3>
-  - ...
 
 * [Content](#content)
 
