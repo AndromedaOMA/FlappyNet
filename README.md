@@ -1,15 +1,17 @@
 <h1 align="center">Hi 👋, here we have the FlappyNet project</h1>
-<h3 align="center">Developed this project together with Marin Andrei (andier13 on GitHub) in the fifth semester of the faculty.</h3>
+<h3 align="center">Developed and trained a Deep Q-Learning using Convolutional Neural Network for processing the Flappy Bird game using PyTorch framwork!</h3>
 
 
 ## Table Of Content
-* [FlappyNet: Developed and trained a Convolutional Neural Network for processing the Flappy Bird game using PyTorch framwork](#flappynet)
+* [FlappyNet](#flappynet)
 * [Installation](#inst)
 
 --------------------------------------------------------------------------------
 <h1 id="flappynet" align="left">FlappyNet:</h1>
 
 **NOTE**: This project represents the final project supported and realized within the Neueonal Networks laboratories of the Faculty of Computer Science of the Alexandru Ioan Cuza University in Iași, Romania.
+
+**ALSO NOTE**: Developed this project together with Marin Andrei (andier13 on GitHub) in the fifth semester of the faculty.
 
 <h3 align="left">Here we have the requirement:</h3>
 
