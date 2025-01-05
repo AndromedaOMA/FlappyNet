@@ -9,10 +9,6 @@
 --------------------------------------------------------------------------------
 <h1 id="flappynet" align="left">FlappyNet:</h1>
 
-**NOTE**: This project represents the final project supported and realized within the Neueonal Networks laboratories of the Faculty of Computer Science of the Alexandru Ioan Cuza University in Iași, Romania.
-
-**ALSO NOTE**: Developed this project together with Marin Andrei (andier13 on GitHub) in the fifth semester of the faculty.
-
 <h3 align="left">Here we have the requirement:</h3>
 
 Implement and train a neural network using the Q learning algorithm to control an agent in the Flappy Bird game.
@@ -72,6 +68,10 @@ Q(s,a) = V(s) + A(s,a) − (1/|A|) * ∑ A(s,a')
 3. Have fun!
 
 * [Table Of Content](#table-of-content)
+
+**NOTE**: This project represents the final project supported and realized within the Neueonal Networks laboratories of the Faculty of Computer Science of the Alexandru Ioan Cuza University in Iași, Romania.
+
+**ALSO NOTE**: Developed this project together with Marin Andrei (andier13 on GitHub) in the fifth semester of the faculty.
 
 ---
 
