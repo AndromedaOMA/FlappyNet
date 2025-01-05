@@ -5,6 +5,7 @@
 ## Table Of Content
 * [FlappyNet](#flappynet)
 * [Installation](#inst)
+* [Best Score](#score)
 
 --------------------------------------------------------------------------------
 <h1 id="flappynet" align="left">FlappyNet:</h1>
@@ -68,6 +69,14 @@ Q(s,a) = V(s) + A(s,a) − (1/|A|) * ∑ A(s,a')
 3. Have fun!
 
 * [Table Of Content](#table-of-content)
+
+---
+
+<h3 id="score" align="left">Best score:</h3>
+
+<img src="https://github.com/user-attachments/assets/20a59458-2199-4a58-8c67-7afe1945c65e" alt="Moments before the disaster" style="width: 300px; height: auto;">
+
+---
 
 **NOTE**: This project represents the final project supported and realized within the Neueonal Networks laboratories of the Faculty of Computer Science of the Alexandru Ioan Cuza University in Iași, Romania.
 
