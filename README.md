@@ -82,6 +82,8 @@ Q(s,a) = V(s) + A(s,a) − (1/|A|) * ∑ A(s,a')
 
 **ALSO NOTE**: Developed this project together with Marin Andrei (andier13 on GitHub) in the fifth semester of the faculty.
 
+* [Table Of Content](#table-of-content)
+
 ---
 
 - ⚡ Fun fact: **Through this project I developed better the subtle concepts of Reinforcement Learning and Q-Learning!**
