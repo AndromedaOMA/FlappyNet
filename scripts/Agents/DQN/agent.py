@@ -37,7 +37,7 @@ class Agent:
         # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2)
 
     def run(self, is_training=True, render=False):
-        env = gymnasium.make("FlappyBird-v0", render_mode="human" if render else None)
+        env = gymnasium.make("FlappyBird-v0", render_mode="human" if render else None, use_lidar=False)
 
         num_states = env.observation_space.shape[0]
         num_actions = env.action_space.n

@@ -40,7 +40,7 @@ class Agent2:
         # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2)
 
     def run(self, is_training=True, render=False):
-        env = gymnasium.make("FlappyBird-v0", render_mode="human" if render else None)
+        env = gymnasium.make("FlappyBird-v0", render_mode="human" if render else None, use_lidar=False)
 
         num_actions = env.action_space.n
         policy_dqn = DuelingCNN(input_channels=self.image_stack_dimension, input_size=64, out_layer_dim=2).to(device)
