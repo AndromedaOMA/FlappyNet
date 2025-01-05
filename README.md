@@ -1,5 +1,5 @@
 <h1 align="center">Hi 👋, here we have the FlappyNet project</h1>
-<h3 align="center">Developed and trained a Deep Q-Learning using Convolutional Neural Network for processing the Flappy Bird game using PyTorch framwork!</h3>
+<h3 align="center">Developed and trained a Deep Q-Learning using Convolutional Neural Network for processing the Flappy Bird game using PyTorch framework!</h3>
 
 
 ## Table Of Content
@@ -46,11 +46,19 @@ It is not necessary to implement the neural network from scratch (you can use Py
 
   The multilayer neural network consists of three hidden layers of 256 perceptrons each followed by a LayerNorm for data normalization. For the first layer we will use the ReLU activation function, and for the second layer the GeLU activation function and a Dropout for regularization.
   
-  The convolutional neural network contains 2 convolutional layers followed by one Pooling layer each. The first convolution layer will contain 16 channels and the second layer will contain 32 channels. The transition from each convolution layer to the pooling layer is processed and filtered by means of a ReLU activation function and BatchNorm2d normalization.
+  The convolutional neural network contains 2 convolutional layers followed by one Pooling layer each. The first convolution layer will contain 16 channels and the second layer will contain 32 channels. The transition from each convolution layer to the pooling layer is processed and filtered by means of a ReLU activation function and BatchNorm2d normalization. The convolutional layers are followed by a fully connected network consisting of two hidden layers, between which is a ReLU activation function and the Dropout regularizer. The LogSoftmax function is attached to the last layer.
 
   Through these two Neural Networks, for each one separately, a Target Neural Network identical to the initial one was applied and trained, in parallel, through the Experience Replay stack.
 
-  Finally the original Neural Networks were adapted to the Dueling Architecture
+  Finally the original Neural Networks were adapted to the Dueling Architecture. Dueling DQN and Dueling CNN Neural Networks receive the same specific architecture, the only significant difference between them is given by the convolutional layers described above. We use Dueling architecture because this architecture leads to better policy evaluation. NOTE: The Dueling architecture is nothing but an extension of the standard Deep Q-Network (DQN)!
+  
+  The architecture used will change the last layers of Fully Connected Neural Networks into two streams, one associated with value (value_stream) and another associated with advantages (advantages_stream). streams will consist of two hidden layers and a ReLU activation function.
+  
+  Here we have the summary and the function/formula we will apply within the Dueling architecture: 
+```bash
+Q(s,a) = V(s) + A(s,a) − (1/|A|) * ∑ A(s,a')
+```
+ I other words: V + A - mean(A), where V is the computed Value using the value_stream and A is the computed Advantages using the advantages_stream.
 
 * [Table Of Content](#table-of-content)
 
