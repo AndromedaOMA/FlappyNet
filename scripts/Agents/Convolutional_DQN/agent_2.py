@@ -28,9 +28,8 @@ class Agent2:
         self.best_reward = 5
 
         self.enable_double_dqn = True
-
-        self.image_stack_dimension = 4
         self.model_to_test = model_to_test
+        self.image_stack_dimension = 4
 
         self.loss_fn = torch.nn.SmoothL1Loss()
         # self.loss_fn = torch.nn.MSELoss()
@@ -84,7 +83,7 @@ class Agent2:
                 new_frame = env.render()
                 stacked_frames = frame_stacker.update(new_frame)
 
-                new_frame = torch.tensor(stacked_frames, dtype=torch.float, device=device)
+                new_frame = torch.tensor(stacked_frames, dtype=torch.float, device=device).unsqueeze(0)
                 reward = torch.tensor(reward, dtype=torch.float, device=device)
 
                 memory.append((frame, torch.tensor(action), new_frame, reward, terminated))
@@ -130,11 +129,10 @@ class Agent2:
         env = gymnasium.make("FlappyBird-v0", render_mode="human", use_lidar=False)
 
         policy_dqn = DuelingCNN(input_channels=self.image_stack_dimension, input_size=64, out_layer_dim=2).to(device)
-        policy_dqn.load_state_dict(torch.load(f"./best_models_CNN/DuelingCNN/last_state/trained_q_function", weights_only=True))
+        policy_dqn.load_state_dict(torch.load(self.model_to_test, weights_only=True))
         policy_dqn.eval()
 
         frame_stacker = FrameStacker(stack_size=self.image_stack_dimension, height=64, width=64)
-        epsilon_history = []
 
         for episode in itertools.count():
             _, _ = env.reset()
@@ -144,7 +142,6 @@ class Agent2:
 
             terminated = False
             episode_reward = 0.0
-            last_frame = None
 
             while not terminated:
                 action = policy_dqn(frame).argmax().item()
@@ -152,7 +149,6 @@ class Agent2:
                 # Environment step
                 _, reward, terminated, _, _ = env.step(action)
                 new_frame = env.render()
-                last_frame = new_frame
                 stacked_frames = frame_stacker.update(new_frame)
 
                 frame = torch.tensor(stacked_frames, dtype=torch.float, device=device).unsqueeze(0)
@@ -185,9 +181,9 @@ class Agent2:
         """
         frames, actions, new_frames, rewards, terminations = zip(*mini_batch)
 
-        frames = torch.stack(frames)
+        frames = torch.cat(frames)
         actions = torch.tensor(actions, dtype=torch.long, device=device)
-        new_frames = torch.stack(new_frames)
+        new_frames = torch.cat(new_frames)
         rewards = torch.stack(rewards)
         terminations = torch.tensor(terminations, dtype=torch.float, device=device)
 
