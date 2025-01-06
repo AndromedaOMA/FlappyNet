@@ -3,10 +3,12 @@ import gymnasium
 import torch
 import itertools
 import random
+from datetime import datetime
 
 from scripts import DuelingCNN, ReplayMemory, FrameStacker
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = 'cpu'
 print(f"Device: {device}")
 
 
@@ -39,63 +41,62 @@ class Agent2:
         # optimizer = optim.Adam(params=model.parameters(), lr=0.001, weight_decay=1e-4)
         # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2)
 
-    def run(self, is_training=True, render=False):
-        env = gymnasium.make("FlappyBird-v0", render_mode="human" if render else None, use_lidar=False)
+    def dqn_train(self):
+        env = gymnasium.make("FlappyBird-v0", render_mode="rgb_array", use_lidar=False)
 
-        num_actions = env.action_space.n
         policy_dqn = DuelingCNN(input_channels=self.image_stack_dimension, input_size=64, out_layer_dim=2).to(device)
+        # Duplicate the DQN for target_dqn where we are going to compute the Q values
+        target_dqn = DuelingCNN(input_channels=self.image_stack_dimension, input_size=64, out_layer_dim=2).to(device)
+        # Copy the w and b at target_dqn from policy_dqn
+        target_dqn.load_state_dict(policy_dqn.state_dict())
 
-        if not is_training:
-            policy_dqn.load_state_dict(torch.load(self.model_to_test))
-            print("Loaded the trained Q-function for testing.")
+        memory = ReplayMemory(self.replay_memory_size)
+        epsilon = self.epsilon_init
 
-        if is_training:
-            memory = ReplayMemory(self.replay_memory_size)
-            epsilon = self.epsilon_init
+        step_count = 0
 
-            # Duplicate the DQN for target_dqn where we are going to compute the Q values
-            target_dqn = DuelingCNN(input_channels=self.image_stack_dimension, input_size=64, out_layer_dim=2).to(device)
-            # Copy the w and b at target_dqn from policy_dqn
-            target_dqn.load_state_dict(policy_dqn.state_dict())
-
-            step_count = 0
-            self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a, weight_decay=1e-4)
-            self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=10, T_mult=2)
+        self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a, weight_decay=1e-4)
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=10, T_mult=2)
 
         reward_per_episode = []
         epsilon_history = []
         frame_stacker = FrameStacker(stack_size=self.image_stack_dimension, height=64, width=64)
 
         for episode in itertools.count():
-            state, _ = env.reset()
-            stacked_frames = frame_stacker.reset(state)
-            state = torch.tensor(stacked_frames, dtype=torch.float, device=device)
+            _, _ = env.reset()
+            frame = env.render()
+            stacked_frames = frame_stacker.reset(frame)
+            frame = torch.tensor(stacked_frames, dtype=torch.float, device=device).unsqueeze(0)
 
             terminated = False
             episode_reward = 0.0
 
             while not terminated:
                 # Epsilon-greedy action selection
-                if is_training and random.random() < epsilon:
+                if random.random() < epsilon:
                     action = env.action_space.sample()
                 else:
-                    with torch.no_grad():  # ??
-                        action = policy_dqn(state.unsqueeze(dim=0)).squeeze().argmax().item()
-                        # action = policy_dqn(state.unsqueeze(dim=0)).argmax().item()
+                    with torch.no_grad():
+                        action = policy_dqn(frame).argmax().item()
 
                 # Environment step
-                new_frame, reward, terminated, _, info = env.step(action)
+                _, reward, terminated, _, _ = env.step(action)
+                new_frame = env.render()
                 stacked_frames = frame_stacker.update(new_frame)
-                episode_reward += reward
 
-                new_state = torch.tensor(stacked_frames, dtype=torch.float, device=device)
+                new_frame = torch.tensor(stacked_frames, dtype=torch.float, device=device)
                 reward = torch.tensor(reward, dtype=torch.float, device=device)
 
-                if is_training:
-                    memory.append((state, torch.tensor(action), new_state, reward, terminated))
-                    step_count += 1
+                memory.append((frame, torch.tensor(action), new_frame, reward, terminated))
+                step_count += 1
 
-                state = new_state
+                episode_reward += reward
+                frame = new_frame
+
+                # Train the network
+                if len(memory) > self.mini_batch_size:
+                    mini_batch = memory.sample(self.mini_batch_size)
+                    self.optimize(mini_batch, policy_dqn, target_dqn)
 
             reward_per_episode.append(episode_reward)
 
@@ -103,28 +104,70 @@ class Agent2:
             epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
             epsilon_history.append(epsilon)
 
-            # Train the network
-            if is_training and len(memory) > self.mini_batch_size:
-                mini_batch = memory.sample(self.mini_batch_size)
-                self.optimize(mini_batch, policy_dqn, target_dqn)
+            # Sync target network
+            if step_count >= self.network_sync_rate:
+                # Copy the w and b at target_dqn from policy_dqn at each self.network_sync_rate
+                target_dqn.load_state_dict(policy_dqn.state_dict())
+                step_count = 0
 
-                # Sync target network
-                if step_count >= self.network_sync_rate:
-                    # Copy the w and b at target_dqn from policy_dqn at each self.network_sync_rate
-                    target_dqn.load_state_dict(policy_dqn.state_dict())
-                    step_count = 0
+            if episode % 100 == 0:
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                filename = f"./best_models_CNN/DuelingCNN/trained_q_function_{timestamp}_{episode_reward:.2f}.pth"
 
-            if episode_reward > self.best_reward:
-                self.best_reward = episode_reward
-                torch.save(policy_dqn.state_dict(), f"./best_models_CNN/DuelingCNN/trained_q_function_{self.best_reward:.3f}.pth")
-                print(f"Model with best reward of {episode_reward} saved at episode {episode}.")
+                torch.save(policy_dqn.state_dict(), filename)
+                torch.save(policy_dqn.state_dict(), f"./best_models_CNN/DuelingCNN/last_state/trained_q_function")
+
+                print(f"Model with reward of {episode_reward} saved at episode {episode}.")
 
             print(f"Episode: {episode}, Reward: {episode_reward}, Epsilon: {epsilon:.3f}")
 
             # Exit
-            if is_training and episode_reward >= self.stop_on_reward:
+            if episode_reward >= self.stop_on_reward:
                 print(f"Training stopped after achieving reward threshold of {self.stop_on_reward}.")
                 break
+
+    def test_agent(self):
+        env = gymnasium.make("FlappyBird-v0", render_mode="human", use_lidar=False)
+
+        policy_dqn = DuelingCNN(input_channels=self.image_stack_dimension, input_size=64, out_layer_dim=2).to(device)
+        policy_dqn.load_state_dict(torch.load(f"./best_models_CNN/DuelingCNN/last_state/trained_q_function", weights_only=True))
+        policy_dqn.eval()
+
+        frame_stacker = FrameStacker(stack_size=self.image_stack_dimension, height=64, width=64)
+        epsilon_history = []
+
+        for episode in itertools.count():
+            _, _ = env.reset()
+            frame = env.render()
+            stacked_frames = frame_stacker.reset(frame)
+            frame = torch.tensor(stacked_frames, dtype=torch.float, device=device).unsqueeze(0)
+
+            terminated = False
+            episode_reward = 0.0
+            last_frame = None
+
+            while not terminated:
+                action = policy_dqn(frame).argmax().item()
+
+                # Environment step
+                _, reward, terminated, _, _ = env.step(action)
+                new_frame = env.render()
+                last_frame = new_frame
+                stacked_frames = frame_stacker.update(new_frame)
+
+                frame = torch.tensor(stacked_frames, dtype=torch.float, device=device).unsqueeze(0)
+                episode_reward += reward
+
+            print(f"Episode: {episode}, Reward: {episode_reward}")
+
+        policy_dqn.train()
+        env.close()
+
+    def run(self, is_training=True, render=False):
+        if is_training:
+            self.dqn_train()
+        else:
+            self.test_agent()
 
     def optimize(self, mini_batch, policy_dqn, target_dqn):
         """
@@ -152,8 +195,7 @@ class Agent2:
             if self.enable_double_dqn:
                 """Double DQN Target Formula"""
                 best_action_from_policy = policy_dqn(new_frames).argmax(dim=1)
-                target_q = rewards + (1 - terminations) * self.discount_factor_g * target_dqn(new_frames).gather(dim=1,
-                                                                                                                 index=best_action_from_policy.unsqueeze(dim=1)).squeeze()
+                target_q = rewards + (1 - terminations) * self.discount_factor_g * target_dqn(new_frames).gather(dim=1, index=best_action_from_policy.unsqueeze(dim=1)).squeeze()
             else:
                 """DQN Target Formula"""
                 target_q = rewards + (1 - terminations) * self.discount_factor_g * target_dqn(new_frames).max(dim=1)[0]

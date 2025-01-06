@@ -1,12 +1,13 @@
 from collections import deque
-import cv2
+import PIL.Image as Image
 import numpy as np
 
 
 def preprocess_frame(frame, height=84, width=84):
-    frame = cv2.resize(frame, (width, height))    # Resize
-    frame = frame / 255.0                               # Normalization
-    frame = np.expand_dims(frame, axis=0)               # Add channel dimension [1, H, W]
+    gray = Image.fromarray(frame).convert('L')
+    resized = gray.resize((height, width))
+    normalized = np.array(resized, dtype=np.float32) / 255.0
+    frame = np.expand_dims(normalized, axis=0)               # Add channel dimension [1, H, W]
     return frame
 
 
