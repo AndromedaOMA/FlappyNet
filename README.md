@@ -74,7 +74,7 @@ Q(s,a) = V(s) + A(s,a) − (1/|A|) * ∑ A(s,a')
 ```
  I other words: V + A - mean(A), where V is the computed Value using the value_stream and A is the computed Advantages using the advantages_stream.
 
-  Also the concept of double DQN comes with the application of the following formula for finding the q-value inferred by the Target Neural Network:
+  Also the concept of double DQN comes with the application of the following formula for finding the q-value inferred by the Target Neural Network in order to compute the loss between Policy Neural Network and Target Neural Network:
 
 ```bash
 best_action = arg(max(Qp[new_state, :]))
