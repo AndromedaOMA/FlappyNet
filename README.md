@@ -77,12 +77,12 @@ Q(s,a) = V(s) + A(s,a) − (1/|A|) * ∑ A(s,a')
   Also the concept of double DQN comes with the application of the following formula for finding the q-value inferred by the Target Neural Network:
 
 ```bash
-best_action = arg(max(Qp(new_state, :]))
+best_action = arg(max(Qp[new_state, :]))
 ```
 
 ```bash
 Qt[state, action] = reward if new_state is terminal else
-reward + discount_factor * Qt[best_action]
+                    reward + discount_factor * Qt[best_action]
 ```
 
 * [Table Of Content](#table-of-content)
