@@ -5,7 +5,7 @@
 ## Table Of Content
 * [FlappyNet](#flappynet)
 * [Installation](#installation)
-* [Best Score](#best_score)
+* [Best Score](#best-score)
 
 --------------------------------------------------------------------------------
 <h1 id="flappynet" align="left">FlappyNet:</h1>
@@ -74,6 +74,17 @@ Q(s,a) = V(s) + A(s,a) − (1/|A|) * ∑ A(s,a')
 ```
  I other words: V + A - mean(A), where V is the computed Value using the value_stream and A is the computed Advantages using the advantages_stream.
 
+  Also the concept of double DQN comes with the application of the following formula for finding the q-value inferred by the Target Neural Network:
+
+```bash
+best_action = arg(max(Qp(new_state, :]))
+```
+
+```bash
+Qt[state, action] = reward if new_state is terminal else
+reward + discount_factor * Qt[best_action]
+```
+
 * [Table Of Content](#table-of-content)
 
 ---
@@ -89,7 +100,7 @@ Q(s,a) = V(s) + A(s,a) − (1/|A|) * ∑ A(s,a')
 
 ---
 
-<h3 id="best_score" align="left">Best score:</h3>
+<h3 id="best-score" align="left">Best score:</h3>
 
 <img src="https://github.com/user-attachments/assets/1b53b7f2-bc87-4ee5-ae97-14bdf6a11f06" alt="Moments before the disaster" style="width: 300px; height: auto;">
 
