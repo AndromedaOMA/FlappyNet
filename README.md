@@ -102,6 +102,8 @@ https://github.com/user-attachments/assets/a0886d09-92c1-40fc-be20-029d462509af
 
 <img src="https://github.com/user-attachments/assets/1b53b7f2-bc87-4ee5-ae97-14bdf6a11f06" alt="Moments before the disaster" style="width: 300px; height: auto;">
 
+* [Table Of Content](#table-of-content)
+
 ---
 
 <h3 id="installation" align="left">Installation:</h3>
