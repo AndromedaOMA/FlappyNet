@@ -6,6 +6,7 @@
 * [FlappyNet](#flappynet)
 * [Installation](#installation)
 * [Best Score](#best-score)
+* [Presentation Video](#presentation-video)
 
 --------------------------------------------------------------------------------
 <h1 id="flappynet" align="left">FlappyNet:</h1>
@@ -103,6 +104,12 @@ Qt[state, action] = reward if new_state is terminal else
 <h3 id="best-score" align="left">Best score:</h3>
 
 <img src="https://github.com/user-attachments/assets/1b53b7f2-bc87-4ee5-ae97-14bdf6a11f06" alt="Moments before the disaster" style="width: 300px; height: auto;">
+
+---
+
+<h3 id="presentation-video" align="left">Presentation Video:</h3>
+
+https://github.com/user-attachments/assets/a0886d09-92c1-40fc-be20-029d462509af
 
 ---
 
