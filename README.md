@@ -4,9 +4,9 @@
 
 ## Table Of Content
 * [FlappyNet](#flappynet)
-* [Installation](#installation)
-* [Best Score](#best-score)
 * [Presentation Video](#presentation-video)
+* [Best Score](#best-score)
+* [Installation](#installation)
 
 --------------------------------------------------------------------------------
 <h1 id="flappynet" align="left">FlappyNet:</h1>
@@ -90,12 +90,9 @@ Qt[state, action] = reward if new_state is terminal else
 
 ---
 
-<h3 id="installation" align="left">Installation:</h3>
+<h3 id="presentation-video" align="left">Presentation Video:</h3>
 
-1. Clone the current repositoy! Now you have the project avalable on your local server!</br>
- Type command: ```git clone git@github.com:AndromedaOMA/FlappyNet.git```
-2. Select, open and run the FlappyNet project through PyCharm IDE or the preferred IDE.
-3. Have fun!
+https://github.com/user-attachments/assets/a0886d09-92c1-40fc-be20-029d462509af
 
 * [Table Of Content](#table-of-content)
 
@@ -107,9 +104,14 @@ Qt[state, action] = reward if new_state is terminal else
 
 ---
 
-<h3 id="presentation-video" align="left">Presentation Video:</h3>
+<h3 id="installation" align="left">Installation:</h3>
 
-https://github.com/user-attachments/assets/a0886d09-92c1-40fc-be20-029d462509af
+1. Clone the current repositoy! Now you have the project avalable on your local server!</br>
+ Type command: ```git clone git@github.com:AndromedaOMA/FlappyNet.git```
+2. Select, open and run the FlappyNet project through PyCharm IDE or the preferred IDE.
+3. Have fun!
+
+* [Table Of Content](#table-of-content)
 
 ---
 
@@ -120,5 +122,4 @@ https://github.com/user-attachments/assets/a0886d09-92c1-40fc-be20-029d462509af
 * [Table Of Content](#table-of-content)
 
 ---
-
 - ⚡ Fun fact: **Through this project I developed better the subtle concepts of Reinforcement Learning and Q-Learning!**
