@@ -11,9 +11,8 @@ from scripts import Agent2
 # agent = Agent2("./best_models_CNN/CNN/trained_q_function_???.pth") # still working
 
 """Dueling-CNN-DQN"""
-agent = Agent2("./best_models_CNN/DuelingCNN/last_state/trained_q_function_final")
-# agent = Agent2("./best_models_CNN/DuelingCNN/last_state/trained_q_function")
+# agent = Agent2("./best_models_CNN/DuelingCNN/last_state/trained_q_function_final", continue_training=True)
+agent = Agent2("./best_models_CNN/DuelingCNN/last_state/trained_q_function", continue_training=True)
 
-agent.run(is_training=False, render=True)
-# agent.run(is_training=True, render=False)
-
+agent.run(is_training=False)
+# agent.run(is_training=True)

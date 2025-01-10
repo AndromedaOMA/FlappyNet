@@ -7,13 +7,14 @@ from datetime import datetime
 
 from scripts import DuelingCNN, ReplayMemory, FrameStacker
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = 'cpu'
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
 
 class Agent2:
-    def __init__(self, model_to_test):
+    def __init__(self, model_to_test, continue_training=False):
+
+        self.continue_training = continue_training
 
         # Hyperparameters
         self.replay_memory_size = 200000
@@ -25,8 +26,8 @@ class Agent2:
         self.learning_rate_a = 0.001
         self.discount_factor_g = 0.999
         self.stop_on_reward = 500
-        self.best_reward = 5
 
+        self.max_episodes = 100003
         self.enable_double_dqn = True
         self.model_to_test = model_to_test
         self.image_stack_dimension = 4
@@ -46,22 +47,41 @@ class Agent2:
         policy_dqn = DuelingCNN(input_channels=self.image_stack_dimension, input_size=64, out_layer_dim=2).to(device)
         # Duplicate the DQN for target_dqn where we are going to compute the Q values
         target_dqn = DuelingCNN(input_channels=self.image_stack_dimension, input_size=64, out_layer_dim=2).to(device)
-        # Copy the w and b at target_dqn from policy_dqn
-        target_dqn.load_state_dict(policy_dqn.state_dict())
-
-        memory = ReplayMemory(self.replay_memory_size)
-        epsilon = self.epsilon_init
-
-        step_count = 0
 
         self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a, weight_decay=1e-4)
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=10, T_mult=2)
 
-        reward_per_episode = []
-        epsilon_history = []
         frame_stacker = FrameStacker(stack_size=self.image_stack_dimension, height=64, width=64)
 
-        for episode in itertools.count():
+        if not self.continue_training:
+            # Copy the w and b at target_dqn from policy_dqn
+            target_dqn.load_state_dict(policy_dqn.state_dict())
+
+            # frame_stacker = FrameStacker(stack_size=self.image_stack_dimension, height=64, width=64)
+            memory = ReplayMemory(self.replay_memory_size)
+            epsilon = self.epsilon_init
+            step_count = 0
+            start_episode = 0
+            reward_per_episode = []
+        else:
+            # Load checkpoint
+            checkpoint = torch.load("../checkpoint.pth", map_location=device)
+
+            policy_dqn.load_state_dict(checkpoint['policy_dqn_state_dict'])
+            target_dqn.load_state_dict(checkpoint['target_dqn_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+
+            # frame_stacker = checkpoint['frame_stacker']
+            memory = checkpoint['memory']
+            epsilon = checkpoint['epsilon']
+            step_count = checkpoint['step_count']
+            start_episode = checkpoint['episode'] + 1
+            reward_per_episode = checkpoint['reward_per_episode']
+
+            print(f"Resumed training from episode {start_episode}.")
+
+        for episode in range(start_episode, self.max_episodes):
             _, _ = env.reset()
             frame = env.render()
             stacked_frames = frame_stacker.reset(frame)
@@ -101,8 +121,6 @@ class Agent2:
 
             # Update epsilon
             epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
-            epsilon_history.append(epsilon)
-
             # Sync target network
             if step_count >= self.network_sync_rate:
                 # Copy the w and b at target_dqn from policy_dqn at each self.network_sync_rate
@@ -110,15 +128,28 @@ class Agent2:
                 step_count = 0
 
             if episode % 100 == 0:
+                checkpoint = {
+                    'episode': episode,
+                    # 'frame_stacker': frame_stacker,
+                    'memory': memory,
+                    'policy_dqn_state_dict': policy_dqn.state_dict(),
+                    'target_dqn_state_dict': target_dqn.state_dict(),
+                    'optimizer_state_dict': self.optimizer.state_dict(),
+                    'scheduler_state_dict': self.scheduler.state_dict(),
+                    'reward_per_episode': reward_per_episode,
+                    'epsilon': epsilon,
+                    'step_count': step_count,
+                }
+                torch.save(checkpoint, "./best_models_CNN/DuelingCNN/checkpoint.pth")
+
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"./best_models_CNN/DuelingCNN/trained_q_function_{timestamp}_{episode_reward:.2f}.pth"
-
                 torch.save(policy_dqn.state_dict(), filename)
                 torch.save(policy_dqn.state_dict(), f"./best_models_CNN/DuelingCNN/last_state/trained_q_function")
 
-                print(f"Model with reward of {episode_reward} saved at episode {episode}.")
+                print(f"Checkpoint and model with reward of {episode_reward} saved at episode {episode}.")
 
-            print(f"Episode: {episode}, Reward: {episode_reward}, Epsilon: {epsilon:.3f}")
+            print(f"Episode: {episode}, Reward: {episode_reward:.2f}, Epsilon: {epsilon:.3f}")
 
             # Exit
             if episode_reward >= self.stop_on_reward:
@@ -159,7 +190,7 @@ class Agent2:
         policy_dqn.train()
         env.close()
 
-    def run(self, is_training=True, render=False):
+    def run(self, is_training=True):
         if is_training:
             self.dqn_train()
         else:

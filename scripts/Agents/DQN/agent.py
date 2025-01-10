@@ -7,8 +7,6 @@ import random
 from scripts import DuelingDQN, ReplayMemory
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Device: {device}")
-
 
 class Agent:
     def __init__(self, model_to_test):
