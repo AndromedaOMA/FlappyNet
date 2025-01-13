@@ -12,24 +12,24 @@ print(f"Device: {device}")
 
 
 class Agent2:
-    def __init__(self, model_to_test, continue_training=False):
+    def __init__(self, continue_training=False):
 
         self.continue_training = continue_training
 
         # Hyperparameters
-        self.replay_memory_size = 200000
+        self.replay_memory_size = 400000
         self.mini_batch_size = 84
         self.epsilon_init = 1
         self.epsilon_decay = 0.998
         self.epsilon_min = 0.1
-        self.network_sync_rate = 100
+        self.network_sync_rate = 10
         self.learning_rate_a = 0.001
         self.discount_factor_g = 0.999
         self.stop_on_reward = 500
 
         self.max_episodes = 100003
         self.enable_double_dqn = True
-        self.model_to_test = model_to_test
+        self.model_to_test = "./best_models_CNN/DuelingCNN/last_state/trained_q_function"
         self.image_stack_dimension = 4
 
         self.loss_fn = torch.nn.SmoothL1Loss()
@@ -57,7 +57,6 @@ class Agent2:
             # Copy the w and b at target_dqn from policy_dqn
             target_dqn.load_state_dict(policy_dqn.state_dict())
 
-            # frame_stacker = FrameStacker(stack_size=self.image_stack_dimension, height=64, width=64)
             memory = ReplayMemory(self.replay_memory_size)
             epsilon = self.epsilon_init
             step_count = 0
@@ -72,7 +71,6 @@ class Agent2:
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
 
-            # frame_stacker = checkpoint['frame_stacker']
             memory = checkpoint['memory']
             epsilon = checkpoint['epsilon']
             step_count = checkpoint['step_count']
@@ -130,7 +128,6 @@ class Agent2:
             if episode % 100 == 0:
                 checkpoint = {
                     'episode': episode,
-                    # 'frame_stacker': frame_stacker,
                     'memory': memory,
                     'policy_dqn_state_dict': policy_dqn.state_dict(),
                     'target_dqn_state_dict': target_dqn.state_dict(),
@@ -140,7 +137,7 @@ class Agent2:
                     'epsilon': epsilon,
                     'step_count': step_count,
                 }
-                torch.save(checkpoint, "./best_models_CNN/DuelingCNN/checkpoint.pth")
+                torch.save(checkpoint, "../checkpoint.pth")
 
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"./best_models_CNN/DuelingCNN/trained_q_function_{timestamp}_{episode_reward:.2f}.pth"
@@ -160,7 +157,13 @@ class Agent2:
         env = gymnasium.make("FlappyBird-v0", render_mode="human", use_lidar=False)
 
         policy_dqn = DuelingCNN(input_channels=self.image_stack_dimension, input_size=64, out_layer_dim=2).to(device)
+
         policy_dqn.load_state_dict(torch.load(self.model_to_test, weights_only=True))
+        #
+        # checkpoint = torch.load("../checkpoint.pth", map_location=device)
+        # policy_dqn.load_state_dict(checkpoint['policy_dqn_state_dict'])
+        # print("Loaded the policy_dqn_state_dict")
+
         policy_dqn.eval()
 
         frame_stacker = FrameStacker(stack_size=self.image_stack_dimension, height=64, width=64)
